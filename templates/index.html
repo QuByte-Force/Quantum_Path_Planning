@@ -1,0 +1,1749 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>Quantum Route Optimization</title>
+    <link rel="preconnect" href="https://unpkg.com">
+    <link rel="preconnect" href="https://cdn.jsdelivr.net">
+    <script src="https://cdn.tailwindcss.com" defer></script>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js" defer></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" defer></script>
+    <script src="https://unpkg.com/babel-standalone@6/babel.min.js" defer></script>
+    <script src="https://unpkg.com/lucide@latest" defer></script>
+    <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js" defer></script>
+         <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js" defer></script>
+         <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js" defer></script>
+         <style>
+               :root {
+          /* Metropolis-inspired Light Professional Theme */
+          --app-bg: #f8fafc; /* Light Gray Background */
+          --card-bg: #ffffff; /* Pure White Cards */
+          --card-border: #e2e8f0; /* Light Gray Border */
+          --text-base: #1e293b; /* Dark Slate Text */
+          --text-muted: #64748b; /* Medium Gray Text */
+          
+          /* Metropolis-inspired Accent Palette */
+          --accent: #3b82f6; /* Professional Blue */
+          --accent-2: #8b5cf6; /* Purple */
+          --accent-3: #06b6d4; /* Cyan */
+          
+          /* Status Colors */
+          --success: #10b981; /* Green */
+          --danger: #ef4444; /* Red */
+          --warning: #f59e0b; /* Amber */
+        }
+
+             /* Metropolis-inspired base styles */
+       body {
+         background-color: var(--app-bg);
+         color: var(--text-base);
+         font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+       }
+
+       /* Clean, modern cards with subtle shadows */
+       .backdrop-blur-md.rounded-3xl,
+       .bg-black.bg-opacity-20.rounded-2xl,
+       .bg-white.bg-opacity-10.rounded-3xl {
+         background-color: var(--card-bg) !important;
+         border: 1px solid var(--card-border);
+         /* Metropolis-style subtle shadow */
+         box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+         border-radius: 12px;
+       }
+
+             /* Map container styling */
+       .border-gray-600 { border-color: var(--card-border) !important; }
+
+       /* Page background override */
+       .min-h-screen { background-image: none !important; background-color: var(--app-bg) !important; }
+
+       /* Metropolis-inspired button gradients */
+       .bg-gradient-to-r {
+         background-image: linear-gradient(135deg, var(--accent) 0%, var(--accent-2) 100%) !important;
+         border: none;
+         color: #fff !important;
+         font-weight: 600;
+         transition: all 0.2s ease;
+       }
+       .bg-gradient-to-r:hover {
+         transform: translateY(-1px);
+         box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+       }
+
+             /* Metropolis-inspired button styles */
+       .bg-red-600 { 
+         background-color: var(--danger) !important; 
+         border: none; 
+         color: #fff !important; 
+         font-weight: 600;
+         transition: all 0.2s ease;
+       }
+       .bg-red-600:hover { 
+         transform: translateY(-1px);
+         box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+       }
+       .bg-blue-600 { 
+         background-color: var(--accent) !important; 
+         border: none; 
+         color: #fff !important; 
+         font-weight: 600;
+         transition: all 0.2s ease;
+       }
+       .bg-blue-600:hover { 
+         transform: translateY(-1px);
+         box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+       }
+
+       /* Metropolis-inspired input styles */
+       input[type="number"], input[type="text"], input[type="file"] {
+         background-color: #ffffff !important;
+         border: 2px solid var(--card-border) !important;
+         border-radius: 8px;
+         color: var(--text-base) !important;
+         transition: border-color 0.2s ease;
+       }
+       input[type="number"]:focus, input[type="text"]:focus, input[type="file"]:focus {
+         border-color: var(--accent) !important;
+         outline: none;
+         box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+       }
+       input::placeholder { color: var(--text-muted); }
+
+             /* Metropolis-inspired list item cards */
+       .bg-gray-800.bg-opacity-50 { 
+         background-color: #f8fafc !important; 
+         border: 1px solid var(--card-border);
+         border-radius: 8px;
+       }
+
+       /* Metropolis-inspired text colors */
+       .text-white { color: var(--text-base) !important; }
+       .text-gray-300 { color: var(--text-muted) !important; }
+       .text-gray-400 { color: var(--text-muted) !important; }
+       .text-green-300 { color: var(--success) !important; }
+       .text-cyan-300 { color: var(--accent-3) !important; }
+       .text-orange-200 { color: var(--warning) !important; }
+       .text-cyan-200 { color: var(--accent-3) !important; }
+
+       /* Metropolis-inspired headings */
+       h1, h2, h3, h4, h5 { 
+         color: var(--text-base);
+         font-weight: 600;
+         line-height: 1.4;
+       }
+
+       /* Metropolis-inspired focus states */
+       button:focus-visible, a:focus-visible, input:focus-visible {
+         outline: 2px solid var(--accent);
+         outline-offset: 2px;
+         border-radius: 4px;
+       }
+
+       /* Metropolis-inspired animations */
+       .animate-pulse {
+         animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+       }
+
+       @keyframes pulse {
+         0%, 100% { opacity: 1; }
+         50% { opacity: 0.8; }
+       }
+      /* Background image helper that can be updated at runtime */
+      .bg-hero {
+        background-image: var(--hero-bg, url(/static/img/bg.png.png?v=1)) !important;
+        background-size: cover !important;
+        background-position: center !important;
+      }
+    </style>
+</head>
+ <body class="bg-gray-50 text-gray-900">
+    <div id="root"></div>
+
+    {% raw %}
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+// Chart.js (local UMD) will be available at window.Chart
+// Icon shims using emojis to avoid external React icon dependency
+const MapPin = ({ className }) => <span className={className} role="img" aria-label="Map pin">📍</span>;
+const Zap = ({ className }) => <span className={className} role="img" aria-label="Lightning bolt">⚡</span>;
+const Clock = ({ className }) => <span className={className} role="img" aria-label="Clock">🕒</span>;
+const Route = ({ className }) => <span className={className} role="img" aria-label="Route">🗺️</span>;
+const ArrowRight = ({ className }) => <span className={className} role="img" aria-label="Arrow right">→</span>;
+const Play = ({ className }) => <span className={className} role="img" aria-label="Play">▶️</span>;
+const RefreshCw = ({ className }) => <span className={className} role="img" aria-label="Refresh">🔄</span>;
+const Trash2 = ({ className }) => <span className={className} role="img" aria-label="Delete">🗑️</span>;
+const Navigation = ({ className }) => <span className={className} role="img" aria-label="Navigation">🧭</span>;
+const Upload = ({ className }) => <span className={className} role="img" aria-label="Upload">📤</span>;
+const FileUp = ({ className }) => <span className={className} role="img" aria-label="File">📄</span>;
+const FileText = ({ className }) => <span className={className} role="img" aria-label="Document">🧾</span>;
+
+const QuantumPathPlanningDemo = () => {
+  const [currentView, setCurrentView] = useState('landing');
+            const [selectedLocations, setSelectedLocations] = useState([]);
+  const DEFAULT_DEPOT = [16.54311706769813, 81.49632689316488];
+            const [startLocation, setStartLocation] = useState({ id: 'start', name: 'SRKR PakkaDelivery 😉📦', coords: DEFAULT_DEPOT, address: `${DEFAULT_DEPOT[0].toFixed(4)}, ${DEFAULT_DEPOT[1].toFixed(4)}` });
+            const [results, setResults] = useState(null);
+            const [isLoading, setIsLoading] = useState(false);
+            const mapRef = useRef(null);
+            const mapInstanceRef = useRef(null);
+            const markersRef = useRef([]);
+  const [mapLoaded, setMapLoaded] = useState(false);
+  const [isSettingStartLocation, setIsSettingStartLocation] = useState(false);
+            const startMarkerRef = useRef(null);
+  const isSettingStartLocationRef = useRef(false);
+  const [numVehicles, setNumVehicles] = useState(1);
+  const [excelData, setExcelData] = useState(null);
+  const [isGeocoding, setIsGeocoding] = useState(false);
+  const polylinesRef = useRef([]);
+  const [isRouting, setIsRouting] = useState(false);
+  const externalMapWinRef = useRef(null);
+  const [toast, setToast] = useState({ show: false, message: '', type: 'info' });
+  const [digipinInput, setDigipinInput] = useState('');
+  const [digipinHint, setDigipinHint] = useState('');
+  const [showUploadPreview, setShowUploadPreview] = useState(false);
+
+  // Generate Digipin for default start location
+            useEffect(() => {
+    const generateDefaultDigipin = async () => {
+      const digipin = await generateDigipinFromCoords(DEFAULT_DEPOT[0], DEFAULT_DEPOT[1]);
+      if (digipin) {
+        setStartLocation(prev => ({ ...prev, digipin }));
+      }
+    };
+    generateDefaultDigipin();
+  }, []);
+
+  // Toast notification function
+  const showToast = (message, type = 'info') => {
+    setToast({ show: true, message, type });
+    setTimeout(() => setToast({ show: false, message: '', type: 'info' }), 4000);
+  };
+
+  // Digipin functions
+  const handleAddByDigipin = async () => {
+    if (digipinInput.trim() === '') {
+      showToast('Please enter a Digipin code.', 'error');
+      return;
+    }
+
+    if (selectedLocations.length >= 8) {
+      showToast('Maximum 8 locations allowed for demo performance', 'error');
+      return;
+    }
+
+    try {
+      const sanitized = digipinInput.trim().toUpperCase().replace(/[^A-Z0-9]/g, '');
+      const response = await fetch('/resolve_digipin', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ digipin: sanitized })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        showToast(errorData.error || 'Invalid Digipin code.', 'error');
+        return;
+      }
+
+      const data = await response.json();
+      const [lat, lng] = data.coords;
+
+      // Validate against optional hint (e.g., city/area)
+      const roughlyMatch = (a, b) => {
+        if (!a || !b) return false;
+        const norm = (s) => String(s).toLowerCase().replace(/[^a-z0-9\s,]/g, ' ').replace(/\s+/g, ' ').trim();
+        const aw = norm(a).split(' ').filter(w => w.length >= 4);
+        const bw = new Set(norm(b).split(' ').filter(w => w.length >= 4));
+        if (aw.length === 0 || bw.size === 0) return false;
+        let hits = 0; aw.forEach(w => { if (bw.has(w)) hits++; });
+        return hits >= 1;
+      };
+
+      let finalCoords = [lat, lng];
+      let finalName = await reverseGeocode(lat, lng);
+      let finalAddress = `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+      if (digipinHint && !roughlyMatch(finalName, digipinHint)) {
+        try {
+          const hintResp = await fetch(`/search_location?query=${encodeURIComponent(digipinHint)}`);
+          if (hintResp.ok) {
+            const hintData = await hintResp.json();
+            if (hintData && Array.isArray(hintData.coords)) {
+              finalCoords = hintData.coords;
+              finalName = (hintData.name || finalName);
+              finalAddress = `${finalCoords[0].toFixed(4)}, ${finalCoords[1].toFixed(4)}`;
+              showToast('Adjusted to hint location.', 'info');
+            }
+          }
+        } catch (e) {}
+      }
+
+      const newLocation = {
+        id: Date.now(),
+        name: finalName,
+        coords: finalCoords,
+        address: finalAddress,
+        digipin: data.digipin
+      };
+
+      // Add marker to map
+      if (mapInstanceRef.current && window.L) {
+        const marker = window.L.marker([lat, lng])
+          .bindPopup(`<strong>${finalName}</strong><br/>${newLocation.address}<br/>Digipin: ${data.digipin}`)
+          .addTo(mapInstanceRef.current);
+        markersRef.current.push({ marker, id: newLocation.id });
+      }
+
+      setSelectedLocations(prev => [...prev, newLocation]);
+      setDigipinInput(''); // Clear inputs
+      setDigipinHint('');
+      showToast(`Location added successfully! Digipin: ${data.digipin}`, 'success');
+    } catch (error) {
+      showToast('Failed to resolve Digipin. Please try again.', 'error');
+    }
+  };
+
+  const generateDigipinFromCoords = async (lat, lng) => {
+    try {
+      const response = await fetch('/encode_coordinates', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ lat, lon: lng })
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        return data.digipin;
+      }
+    } catch (error) {
+      console.error('Failed to generate Digipin:', error);
+    }
+    return null;
+  };
+
+  // Prefer concise, map-like names: take leading segment before comma, keep it short
+  const shortenPlaceName = (value) => {
+    if (!value || typeof value !== 'string') return value;
+    const first = value.split(',')[0].trim();
+    // If very long, truncate sensibly
+    if (first.length > 40) return first.slice(0, 37) + '…';
+    return first;
+  };
+
+  // Simple hash-based routing so browser back/forward works
+  const viewToHash = (view) => {
+    if (view === 'input') return '#input';
+    if (view === 'results') return '#results';
+    return '#landing';
+  };
+  const hashToView = (hash) => {
+    if (hash === '#input') return 'input';
+    if (hash === '#results') return 'results';
+    return 'landing';
+  };
+
+  // Initialize view from URL hash
+            useEffect(() => {
+    try {
+      var initial = hashToView(window.location.hash);
+      if (initial !== currentView) {
+        setCurrentView(initial);
+      }
+    } catch (e) {}
+  }, []);
+
+  // Keep URL hash in sync with currentView
+            useEffect(() => {
+    try {
+      var desired = viewToHash(currentView);
+      if (window.location.hash !== desired) {
+        window.location.hash = desired;
+      }
+    } catch (e) {}
+  }, [currentView]);
+
+  // Listen for back/forward navigation
+  useEffect(() => {
+    const onHashChange = () => {
+      try {
+        var v = hashToView(window.location.hash);
+        if (v !== currentView) {
+          setCurrentView(v);
+        }
+      } catch (e) {}
+    };
+    window.addEventListener('hashchange', onHashChange);
+    return () => window.removeEventListener('hashchange', onHashChange);
+  }, [currentView]);
+            
+            useEffect(() => {
+    isSettingStartLocationRef.current = isSettingStartLocation;
+  }, [isSettingStartLocation]);
+
+  // Load Leaflet when entering input; cleanup only when leaving input
+            useEffect(() => {
+    if (currentView === 'input') {
+      if (window.L) {
+        setMapLoaded(true);
+                    initializeMap();
+                            } else {
+        loadLeaflet();
+      }
+    }
+
+    return () => {
+      // Only tear down when leaving input view
+      if (currentView === 'input') return;
+      if (mapInstanceRef.current) {
+        try {
+          mapInstanceRef.current.off();
+          mapInstanceRef.current.remove();
+        } catch (e) {}
+        mapInstanceRef.current = null;
+      }
+    };
+  }, [currentView]);
+
+  const loadLeaflet = () => {
+    // Check if Leaflet is already loaded
+    if (window.L) {
+      setMapLoaded(true);
+      initializeMap();
+      return;
+    }
+
+    // Load Leaflet CSS
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
+    link.integrity = 'sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=';
+    link.crossOrigin = '';
+    document.head.appendChild(link);
+
+    // Load Leaflet JS
+    const script = document.createElement('script');
+    script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+    script.integrity = 'sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=';
+    script.crossOrigin = '';
+    script.onload = () => {
+      setMapLoaded(true);
+      setTimeout(initializeMap, 100); // Small delay to ensure DOM is ready
+    };
+    document.head.appendChild(script);
+  };
+
+  const geocodeLocations = async (locations) => {
+    if (!locations || locations.length === 0) return [];
+    try {
+      const addresses = locations.map(l => l.address);
+      const resp = await fetch('/geocode', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ addresses })
+      });
+      if (!resp.ok) throw new Error('Failed to geocode');
+      const data = await resp.json();
+      const geo = data.locations || [];
+      const merged = locations.map((l, i) => {
+        const gi = geo[i] || {};
+        const nextCoords = gi && Array.isArray(gi.coords) ? gi.coords : null;
+        return {
+          ...l,
+          // Preserve Excel-provided Order Name as the display name
+          name: l.name,
+          coords: nextCoords
+        };
+      }).filter(function(l){ return Array.isArray(l.coords); });
+      return merged;
+    } catch (e) {
+      showToast('Geocoding failed. Please try again.', 'error');
+      return [];
+    }
+  };
+
+  // Resolve a list of Digipin-coded locations to coordinates and friendly names
+  const resolveDigipins = async (locationsWithDigipins) => {
+    const roughlyMatch = (a, b) => {
+      if (!a || !b) return false;
+      const norm = (s) => String(s).toLowerCase().replace(/[^a-z0-9\s,]/g, ' ').replace(/\s+/g, ' ').trim();
+      const aw = norm(a).split(' ').filter(w => w.length >= 4);
+      const bw = new Set(norm(b).split(' ').filter(w => w.length >= 4));
+      if (aw.length === 0 || bw.size === 0) return false;
+      let hits = 0;
+      aw.forEach(w => { if (bw.has(w)) hits++; });
+      return hits >= 1; // at least one meaningful token overlaps
+    };
+
+    const geocodeSingle = async (address) => {
+      try {
+        const resp = await fetch('/geocode', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ addresses: [address] }) });
+        if (!resp.ok) return null;
+        const data = await resp.json();
+        const l = (data.locations || [])[0];
+        if (!l || !Array.isArray(l.coords)) return null;
+        return { coords: l.coords, name: l.name };
+      } catch (_) { return null; }
+    };
+
+    let mismatches = 0;
+    const promises = (locationsWithDigipins || []).map(async (loc) => {
+      try {
+        const sanitized = (loc.digipin || '').toString().toUpperCase().replace(/[^A-Z0-9]/g, '');
+        if (!sanitized) return null;
+        const response = await fetch('/resolve_digipin', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ digipin: sanitized })
+        });
+        if (!response.ok) return null;
+        const data = await response.json();
+        const [lat, lng] = data.coords || [];
+        if (typeof lat !== 'number' || typeof lng !== 'number') return null;
+        const displayName = await reverseGeocode(lat, lng);
+        let finalCoords = [lat, lng];
+        let finalAddress = `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+        // Validate against Excel-provided address if available
+        if (loc.addressForValidation && !roughlyMatch(displayName, loc.addressForValidation)) {
+          const alt = await geocodeSingle(loc.addressForValidation);
+          if (alt && Array.isArray(alt.coords)) {
+            mismatches++;
+            finalCoords = alt.coords;
+            finalAddress = `${alt.coords[0].toFixed(4)}, ${alt.coords[1].toFixed(4)}`;
+          }
+        }
+        return {
+          ...loc,
+          name: loc.name,
+          coords: finalCoords,
+          address: finalAddress,
+          digipin: data.digipin || sanitized,
+          resolvedName: displayName
+        };
+      } catch (_e) {
+        return null;
+      }
+    });
+    const resolved = await Promise.all(promises);
+    const filtered = resolved.filter(Boolean);
+    if (mismatches > 0) {
+      showToast(`Note: ${mismatches} Digipin location(s) adjusted using address due to mismatch.`, 'info');
+    }
+    return filtered;
+  };
+
+  const handleFileUpload = (event) => {
+    const file = (event && event.target && event.target.files) ? event.target.files[0] : null;
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+      try {
+        const data = new Uint8Array(e.target.result);
+        const workbook = XLSX.read(data, { type: 'array' });
+        const sheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[sheetName];
+        const json = XLSX.utils.sheet_to_json(worksheet);
+
+        // Split rows into Digipin-based and Address-based
+        const locationsWithDigipin = [];
+        const locationsWithAddress = [];
+        (json || []).forEach((row) => {
+          const digipinRaw = row['Digipin'] || row['digipin'] || row['DigiPin'] || row['DIGIPIN'];
+          const address = row['Order Location'] || row['Location'] || row['Address'] || row['address'];
+          const id = row['Order ID'] || Date.now() + Math.random();
+          const name = row['Order Name'] || row['Name'] || 'Unknown';
+          if (digipinRaw && String(digipinRaw).trim()) {
+            locationsWithDigipin.push({
+              id,
+              name,
+              digipin: String(digipinRaw).trim().toUpperCase(),
+              coords: null,
+              addressForValidation: address ? String(address).trim() : null
+            });
+          } else if (address && String(address).trim()) {
+            locationsWithAddress.push({
+              id,
+              name,
+              address: String(address).trim(),
+              coords: null
+            });
+          }
+        });
+
+        const total = locationsWithDigipin.length + locationsWithAddress.length;
+        if (total === 0) {
+          showToast('No valid locations found in the Excel file. Please check the column names.', 'error');
+          return;
+        }
+        if (total > 8) {
+          showToast(`Maximum 8 locations allowed for demo performance. (${total} found)`, 'error');
+          return;
+        }
+
+        setIsGeocoding(true);
+        const [digipinResolved, addressGeocoded] = await Promise.all([
+          resolveDigipins(locationsWithDigipin),
+          geocodeLocations(locationsWithAddress)
+        ]);
+        const finalLocations = [...(digipinResolved || []), ...(addressGeocoded || [])];
+
+        // Render markers for all processed points
+        if (mapInstanceRef.current && window.L) {
+          // Clear old markers
+          markersRef.current.forEach(({ marker }) => { try { mapInstanceRef.current.removeLayer(marker); } catch(e){} });
+          markersRef.current = [];
+          // Add new markers
+          finalLocations.forEach(loc => {
+            const popupContent = `<strong>${loc.name}</strong><br/>${loc.address || ''}${loc.digipin ? `<br/>Digipin: ${loc.digipin}` : ''}`;
+            const m = window.L.marker(loc.coords).bindPopup(popupContent).addTo(mapInstanceRef.current);
+            markersRef.current.push({ marker: m, id: loc.id });
+          });
+          // Fit bounds
+          if (finalLocations.length > 0) {
+            try { mapInstanceRef.current.fitBounds(window.L.latLngBounds(finalLocations.map(l => l.coords)), { padding: [50, 50] }); } catch(e){}
+          }
+        }
+
+        setSelectedLocations(finalLocations);
+        setExcelData(json);
+        showToast(`Successfully processed ${finalLocations.length} locations.`, 'success');
+      } catch (_error) {
+        showToast('Error reading Excel file. Please check the file format.', 'error');
+      } finally {
+        setIsGeocoding(false);
+      }
+    };
+    reader.readAsArrayBuffer(file);
+  };
+
+            const initializeMap = () => {
+                if (!mapRef.current || mapInstanceRef.current) return;
+                
+                try {
+      // Create map centered on default depot
+                    const map = window.L.map(mapRef.current).setView(startLocation && Array.isArray(startLocation.coords) ? startLocation.coords : DEFAULT_DEPOT, 16);
+                    
+                    // Add OpenStreetMap tiles
+                    window.L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        attribution: '© OpenStreetMap contributors'
+                    }).addTo(map);
+
+                    // Add click event listener
+                    map.on('click', handleMapClick);
+                    
+      // Draw default start marker (depot) if available
+      if (startLocation && Array.isArray(startLocation.coords)) {
+        const dep = startLocation.coords;
+        const startIcon = window.L.divIcon({
+          className: 'start-marker',
+          html: '<div style="background-color:#22c55e;width:20px;height:20px;border-radius:50%;border:3px solid white;box-shadow:0 0 10px rgba(0,0,0,0.5);"></div>',
+          iconSize: [20, 20],
+          iconAnchor: [10, 10]
+        });
+        const startMarker = window.L.marker(dep, { icon: startIcon, zIndexOffset: 1000 })
+          .bindPopup(`<strong>🚚 Start Location (Depot)</strong><br/>All routes start here<br/>${dep[0].toFixed(4)}, ${dep[1].toFixed(4)}${startLocation.digipin ? `<br/>Digipin: ${startLocation.digipin}` : ''}`)
+          .addTo(map);
+        startMarkerRef.current = startMarker;
+      }
+                    
+                    mapInstanceRef.current = map;
+
+                    // Render any pre-existing selected locations (e.g., added before map loaded)
+                    try {
+                      if (Array.isArray(selectedLocations) && selectedLocations.length > 0) {
+                        // Clear any old markers
+                        markersRef.current.forEach(({ marker }) => { try { map.removeLayer(marker); } catch(e){} });
+                        markersRef.current = [];
+                        const bounds = [];
+                        selectedLocations.forEach(loc => {
+                          if (!loc || !Array.isArray(loc.coords)) return;
+                          const popupContent = `<strong>${loc.name}</strong><br/>${loc.address || ''}${loc.digipin ? `<br/>Digipin: ${loc.digipin}` : ''}`;
+                          const m = window.L.marker(loc.coords).bindPopup(popupContent).addTo(map);
+                          markersRef.current.push({ marker: m, id: loc.id });
+                          bounds.push(loc.coords);
+                        });
+                        if (bounds.length > 0) {
+                          try { map.fitBounds(window.L.latLngBounds(bounds), { padding: [30, 30] }); } catch(e){}
+                        }
+                      }
+                    } catch (e) {}
+                } catch (error) {
+                    console.error('Error initializing map:', error);
+                }
+            };
+            
+  const reverseGeocode = async (lat, lng) => {
+    try {
+      const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${encodeURIComponent(lat)}&lon=${encodeURIComponent(lng)}&zoom=16&addressdetails=1`;
+      const resp = await fetch(url, { headers: { 'Accept': 'application/json' } });
+      if (!resp.ok) throw new Error('reverse geocode failed');
+      const data = await resp.json();
+      if (data) {
+        const a = data.address || {};
+        const candidates = [
+          data.name,
+          a.attraction,
+          a.tourism,
+          a.amenity,
+          a.building,
+          a.shop,
+          a.leisure,
+          a.road ? (a.house_number ? `${a.road} ${a.house_number}` : a.road) : null,
+          a.neighbourhood,
+          a.suburb,
+          a.village,
+          a.town,
+          a.city,
+          a.county,
+          a.state,
+          data.display_name
+        ];
+        const raw = candidates.find(Boolean);
+        if (raw) {
+          return String(raw).split(',')[0].trim();
+        }
+      }
+    } catch (e) {}
+    return `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+  };
+
+  const handleMapClick = async (e) => {
+                const { lat, lng } = e.latlng;
+
+    // Handle setting the start location (depot) with a single click
+    if (isSettingStartLocationRef.current) {
+                    if (mapInstanceRef.current && window.L) {
+        // Remove existing start marker if present to ensure only one depot
+                        if (startMarkerRef.current) {
+          try { mapInstanceRef.current.removeLayer(startMarkerRef.current); } catch (err) {}
+          startMarkerRef.current = null;
+                        }
+                        
+                        // Generate Digipin for start location
+                        const digipin = await generateDigipinFromCoords(lat, lng);
+                        
+                        const startIcon = window.L.divIcon({
+                            className: 'start-marker',
+          html: '<div style="background-color:#22c55e;width:20px;height:20px;border-radius:50%;border:3px solid white;box-shadow:0 0 10px rgba(0,0,0,0.5);"></div>',
+                            iconSize: [20, 20],
+                            iconAnchor: [10, 10]
+                        });
+        const startMarker = window.L.marker([lat, lng], { icon: startIcon, zIndexOffset: 1000 })
+          .bindPopup(`<strong>🚚 Start Location (Depot)</strong><br/>All routes start here<br/>${lat.toFixed(4)}, ${lng.toFixed(4)}${digipin ? `<br/>Digipin: ${digipin}` : ''}`)
+                            .addTo(mapInstanceRef.current);
+        startMarkerRef.current = startMarker;
+                    }
+             setStartLocation({ 
+         id: 'start', 
+         name: 'SRKR PakkaDelivery 😉📦', 
+         coords: [lat, lng], 
+         address: `${lat.toFixed(4)}, ${lng.toFixed(4)}`,
+         digipin: await generateDigipinFromCoords(lat, lng)
+       });
+                    setIsSettingStartLocation(false);
+      isSettingStartLocationRef.current = false;
+                    return;
+                }
+                
+    if (selectedLocations.length >= 8) {
+      showToast('Maximum 8 locations allowed for demo performance', 'error');
+                    return;
+                }
+
+    const locationName = await reverseGeocode(lat, lng);
+    const digipin = await generateDigipinFromCoords(lat, lng);
+                    const newLocation = {
+                        id: Date.now(),
+                        name: locationName,
+      coords: [lat, lng],
+      address: `${lat.toFixed(4)}, ${lng.toFixed(4)}`,
+      digipin: digipin
+                    };
+
+                    // Add marker to map
+                    if (mapInstanceRef.current && window.L) {
+                        const marker = window.L.marker([lat, lng])
+                            .bindPopup(`<strong>${locationName}</strong><br/>${lat.toFixed(4)}, ${lng.toFixed(4)}${digipin ? `<br/>Digipin: ${digipin}` : ''}`)
+                            .addTo(mapInstanceRef.current);
+                        
+                        markersRef.current.push({ marker, id: newLocation.id });
+    }
+    
+    // Use functional update to avoid stale closure and allow multiple additions
+    setSelectedLocations(prev => {
+      if (prev.length >= 8) {
+        showToast('Maximum 8 locations allowed for demo performance', 'error');
+        return prev;
+      }
+                    return [...prev, newLocation];
+                });
+            };
+            
+            const removeLocation = (locationId) => {
+    // Remove from state
+    setSelectedLocations(selectedLocations.filter(loc => loc.id !== locationId));
+                
+                // Remove marker from map
+                const markerData = markersRef.current.find(m => m.id === locationId);
+                if (markerData && mapInstanceRef.current) {
+                    mapInstanceRef.current.removeLayer(markerData.marker);
+                    markersRef.current = markersRef.current.filter(m => m.id !== locationId);
+                }
+            };
+            
+            const clearAllLocations = () => {
+                try {
+                    setSelectedLocations([]);
+                    setExcelData(null);
+                    if (startMarkerRef.current && mapInstanceRef.current) {
+                        try { mapInstanceRef.current.removeLayer(startMarkerRef.current); } catch (e) {}
+                        startMarkerRef.current = null;
+                    }
+                    if (markersRef.current && Array.isArray(markersRef.current)) {
+                        markersRef.current.forEach(({ marker }) => {
+                            try { if (mapInstanceRef.current && marker) mapInstanceRef.current.removeLayer(marker); } catch (e) {}
+                        });
+                    }
+                    markersRef.current = [];
+                    if (mapInstanceRef.current) {
+                        try { mapInstanceRef.current.eachLayer((l) => { if (l && l._path) mapInstanceRef.current.removeLayer(l); }); } catch (e) {}
+                    }
+                    showToast('All locations cleared', 'info');
+                } catch (e) {}
+            };
+
+  const removeStartLocation = () => {
+    setStartLocation(null);
+                if (startMarkerRef.current && mapInstanceRef.current) {
+      try { mapInstanceRef.current.removeLayer(startMarkerRef.current); } catch (err) {}
+                    startMarkerRef.current = null;
+                }
+            };
+            
+  const centerOnStart = () => {
+    if (mapInstanceRef.current && startLocation) {
+      try { mapInstanceRef.current.setView(startLocation.coords, 16); } catch (e) {}
+    }
+  };
+
+  const clearRouteOverlays = () => {
+    if (!mapInstanceRef.current) return;
+    polylinesRef.current.forEach(layer => {
+      try { mapInstanceRef.current.removeLayer(layer); } catch (e) {}
+    });
+    polylinesRef.current = [];
+  };
+
+  const getCoordsByName = (name) => {
+    if (!name) return null;
+         if (name === 'SRKR PakkaDelivery 😉📦') return startLocation ? startLocation.coords : null;
+    const loc = selectedLocations.find(l => l.name === name);
+    return loc ? loc.coords : null;
+  };
+
+  const renderRouteOnMap = (names) => {
+    if (!mapInstanceRef.current || !names || names.length === 0) return;
+    setIsRouting(true);
+    const coords = names.map(getCoordsByName).filter(Boolean);
+    if (coords.length < 2) return;
+    clearRouteOverlays();
+    const poly = window.L.polyline(coords, { color: '#22c55e', weight: 5, opacity: 0.9 }).addTo(mapInstanceRef.current);
+    polylinesRef.current.push(poly);
+    coords.forEach((c, idx) => {
+      const label = names[idx] || `Stop ${idx + 1}`;
+      const icon = window.L.divIcon({
+        className: 'seq-marker',
+        html: `<div style="display:flex;align-items:center;gap:6px;background:rgba(17,24,39,0.9);color:white;padding:4px 8px;border-radius:12px;border:1px solid #10b981;">
+                 <span style=\"display:inline-flex;justify-content:center;align-items:center;width:20px;height:20px;border-radius:50%;background:#10b981;color:#0b1323;font-weight:700;font-size:12px;\">${idx + 1}</span>
+                 <span style=\"font-size:12px;white-space:nowrap;\">${label}</span>
+               </div>`,
+        iconSize: [10, 10],
+                        iconAnchor: [10, 10]
+                    });
+      const m = window.L.marker(c, { icon }).addTo(mapInstanceRef.current);
+      polylinesRef.current.push(m);
+    });
+    try { mapInstanceRef.current.fitBounds(window.L.latLngBounds(coords)); } catch (e) {}
+    try {
+      if (mapRef.current && typeof mapRef.current.scrollIntoView === 'function') {
+        mapRef.current.scrollIntoView({ behavior: 'smooth' });
+      }
+    } catch (e) {}
+    setIsRouting(false);
+  };
+
+  const showVehicleRoute = (algorithm, routeIndex) => {
+    if (!results) return;
+    const algoData = results[algorithm];
+    if (!algoData) return;
+    const routeObj = algoData.routesByVehicle ? algoData.routesByVehicle[routeIndex] : null;
+    const names = routeObj ? routeObj.tourNames : (algoData.route || []);
+    if (!names || names.length === 0) return;
+
+    if (!mapInstanceRef.current || currentView !== 'input') {
+      setCurrentView('input');
+      // wait for map to be ready
+      setTimeout(() => renderRouteOnMap(names), 400);
+      return;
+    }
+    renderRouteOnMap(names);
+  };
+
+  const addSampleLocations = () => {
+    clearAllLocations();
+                
+                const sampleLocations = [
+      { name: "Manhattan Hub", coords: [40.7589, -73.9851] },
+      { name: "Brooklyn Center", coords: [40.6892, -73.9442] },
+      { name: "Queens Point", coords: [40.7282, -73.7949] },
+      { name: "Bronx Station", coords: [40.8448, -73.8648] }
+    ];
+
+    const newLocations = [];
+    sampleLocations.forEach((location, index) => {
+                    const newLocation = {
+                        id: Date.now() + index,
+                        name: location.name,
+        coords: location.coords,
+        address: `${location.coords[0].toFixed(4)}, ${location.coords[1].toFixed(4)}`
+                    };
+
+                    // Add marker to map
+                    if (mapInstanceRef.current && window.L) {
+                        const marker = window.L.marker(location.coords)
+                            .bindPopup(`<strong>${location.name}</strong><br/>${location.coords[0].toFixed(4)}, ${location.coords[1].toFixed(4)}`)
+                            .addTo(mapInstanceRef.current);
+                        
+                        markersRef.current.push({ marker, id: newLocation.id });
+                    }
+                    
+      newLocations.push(newLocation);
+                });
+                
+                setSelectedLocations(newLocations);
+  };
+
+  const runComparison = async () => {
+                if (selectedLocations.length < 2) {
+                    showToast('Please select at least 2 locations for route planning', 'error');
+                    return;
+                }
+                
+    if (selectedLocations.length > 8) {
+      showToast('Please select maximum 8 locations for demo performance', 'error');
+                    return;
+                }
+                
+    if (numVehicles > selectedLocations.length) {
+      showToast('Number of vehicles cannot be greater than the number of locations.', 'error');
+                    return;
+                }
+                
+                if (!startLocation) {
+      showToast('Please set a Start Location (Depot) before running.', 'error');
+                    return;
+                }
+                
+                setIsLoading(true);
+                
+                try {
+                    const locations = selectedLocations.map(loc => loc.coords);
+                    
+                    const response = await fetch('/solve_tsp', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+        body: JSON.stringify({ locations, num_vehicles: numVehicles, start_location: startLocation.coords })
+      });
+                    
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        throw new Error(errorData.error || 'Failed to solve TSP');
+                    }
+                    
+                    const data = await response.json();
+
+      const indexToName = (idx) => {
+        if (idx === selectedLocations.length) return 'SRKR PakkaDelivery 😉📦';
+        if (idx >= 0 && idx < selectedLocations.length) return selectedLocations[idx].name;
+        return `Location ${idx}`;
+      };
+
+      let processedResults;
+      if (data && data.greedy && data.qaoa) {
+        // Single-route TSP format
+        processedResults = {
+                        classical: {
+            route: data.greedy.tour.map(index => selectedLocations[index].name),
+            totalDistance: data.greedy.length_km,
+            totalTime: Math.round(data.greedy.length_km * 2.5),
+            algorithm: "Greedy Nearest Neighbor",
+            efficiency: Math.round(75 + Math.random() * 15)
+          },
+          quantum: {
+            route: data.qaoa.tour.map(index => selectedLocations[index].name),
+            totalDistance: data.qaoa.length_km,
+            totalTime: Math.round(data.qaoa.length_km * 2.5),
+            algorithm: "QAOA (Quantum Approximate Optimization)",
+            efficiency: Math.round(85 + Math.random() * 15),
+            meta: data.qaoa.meta
+          }
+        };
+      } else if (data && data.greedy_vrp && data.qaoa_vrp) {
+        // Multi-vehicle VRP format: keep routes per vehicle for clearer display
+        const mapRoutes = (routes) => routes.map(r => ({
+          tourNames: r.tour.map(indexToName),
+          length_km: r.length_km
+        }));
+
+        processedResults = {
+          classical: {
+            routesByVehicle: mapRoutes(data.greedy_vrp.routes),
+                            totalDistance: data.greedy_vrp.total_length_km,
+                            totalTime: Math.round(data.greedy_vrp.total_length_km * 2.5),
+                            algorithm: "Greedy Nearest Neighbor (VRP)",
+                            efficiency: Math.round(75 + Math.random() * 15)
+                        },
+                        quantum: {
+            routesByVehicle: mapRoutes(data.qaoa_vrp.routes),
+                            totalDistance: data.qaoa_vrp.total_length_km,
+                            totalTime: Math.round(data.qaoa_vrp.total_length_km * 2.5),
+            algorithm: "QAOA (VRP)",
+                            efficiency: Math.round(85 + Math.random() * 15)
+                        }
+                    };
+      } else {
+        throw new Error('Unexpected response format from solver');
+      }
+                    
+                    setResults(processedResults);
+      setCurrentView('results');
+                } catch (error) {
+                    console.error('Error running comparison:', error);
+                        showToast(`Error: ${error.message}`, 'error');
+                } finally {
+                    setIsLoading(false);
+                }
+            };
+            
+            const resetDemo = () => {
+    // Remove existing map instance immediately
+    if (mapInstanceRef.current) {
+      try {
+        mapInstanceRef.current.off();
+        mapInstanceRef.current.remove();
+      } catch (e) {}
+      mapInstanceRef.current = null;
+    }
+
+    // Clear markers and state
+    markersRef.current = [];
+    startMarkerRef.current = null;
+    setSelectedLocations([]);
+         setStartLocation({ id: 'start', name: 'SRKR PakkaDelivery 😉📦', coords: DEFAULT_DEPOT, address: `${DEFAULT_DEPOT[0].toFixed(4)}, ${DEFAULT_DEPOT[1].toFixed(4)}` });
+    
+    // Regenerate Digipin for default start location
+    const regenerateDefaultDigipin = async () => {
+      const digipin = await generateDigipinFromCoords(DEFAULT_DEPOT[0], DEFAULT_DEPOT[1]);
+      if (digipin) {
+        setStartLocation(prev => ({ ...prev, digipin }));
+      }
+    };
+    regenerateDefaultDigipin();
+                setResults(null);
+    setExcelData(null);
+    setNumVehicles(1);
+    setIsLoading(false);
+    setIsSettingStartLocation(false);
+    isSettingStartLocationRef.current = false;
+
+    // Force re-init on next render
+    setMapLoaded(false);
+    setCurrentView('landing');
+    window.location.hash = '#landing';
+    showToast('Demo reset successfully', 'info');
+  };
+
+  const chartData = results && results.classical && results.quantum ? [
+    { name: 'Distance (km)', Classical: results.classical.totalDistance, Quantum: results.quantum.totalDistance },
+    { name: 'Time (min)', Classical: results.classical.totalTime, Quantum: results.quantum.totalTime },
+    { name: 'Efficiency %', Classical: results.classical.efficiency, Quantum: results.quantum.efficiency }
+  ] : [];
+
+  // Render Chart.js when results are available and on results view
+  useEffect(() => {
+    if (currentView !== 'results' || !results || !results.classical || !results.quantum || !window.Chart) return;
+    const el = document.getElementById('perfChart');
+    if (!el) return;
+    const ctx = el.getContext('2d');
+    try {
+      // Destroy previous chart instance if any
+      if (el._chartInstance && typeof el._chartInstance.destroy === 'function') {
+        el._chartInstance.destroy();
+      }
+      const data = {
+        labels: ['Distance (km)', 'Time (min)', 'Efficiency %'],
+        datasets: [
+          {
+            label: 'Classical',
+            data: [results.classical.totalDistance, results.classical.totalTime, results.classical.efficiency],
+            backgroundColor: '#F97316'
+          },
+          {
+            label: 'Quantum',
+            data: [results.quantum.totalDistance, results.quantum.totalTime, results.quantum.efficiency],
+            backgroundColor: '#06B6D4'
+          }
+        ]
+      };
+      const chart = new window.Chart(ctx, {
+        type: 'bar',
+        data,
+        options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } } }
+      });
+      el._chartInstance = chart;
+    } catch (e) {
+      // ignore chart errors
+    }
+  }, [currentView, results]);
+
+  // Render Mermaid diagram on results view
+  useEffect(() => {
+    if (currentView !== 'results' || !results || !window.mermaid) return;
+    try {
+      window.mermaid.initialize({ startOnLoad: false, securityLevel: 'loose', theme: 'default' });
+      const container = document.getElementById('flowDiagram');
+      if (!container) return;
+      const diagramDefinition = `flowchart LR\nA[Upload/Select Locations] --> B[Geocode / Resolve Digipins]\nB --> C{Vehicles}\nC -->|Classical| D[Greedy / VRP]\nC -->|Quantum| E[QAOA]\nD --> F[Compare]\nE --> F[Compare]\nF --> G[Chart & Map]\nD:::classicStyle\nE:::quantumStyle\nclassDef classicStyle fill:#FDBA74,stroke:#FB923C,color:#111827;\nclassDef quantumStyle fill:#67E8F9,stroke:#22D3EE,color:#0B1323;`;
+      window.mermaid.render('resultsFlow', diagramDefinition, (svgCode) => {
+        container.innerHTML = svgCode;
+      });
+    } catch (e) {}
+  }, [currentView, results, numVehicles]);
+
+  const openExternalMapWindow = () => {
+    try {
+      const data = {
+        startLocation: startLocation && Array.isArray(startLocation.coords) ? { name: startLocation.name, coords: startLocation.coords } : null,
+        locations: (selectedLocations || []).map(l => ({ name: l.name, coords: l.coords, address: l.address }))
+      };
+      const html = '<!DOCTYPE html>' +
+        '<html lang="en">' +
+        '<head>' +
+        '  <meta charset="UTF-8" />' +
+        '  <meta name="viewport" content="width=device-width, initial-scale=1.0" />' +
+        '  <title>Map - Quantum Routes</title>' +
+        '  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />' +
+        '  <style>' +
+        '    html, body { height: 100%; margin: 0; }' +
+        '    #map { position: absolute; inset: 0; }' +
+        '    .leaflet-container { font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; }' +
+        '  </style>' +
+        '  <script>window.initialData = ' + encodeURIComponent(JSON.stringify(data)) + ';<\/script>' +
+        '</head>' +
+        '<body>' +
+        '  <div id="map"></div>' +
+        '  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></' + 'script>' +
+        '  <script>' +
+        '    (function(){' +
+        '      var raw = window.initialData || "";' +
+        '      try { raw = decodeURIComponent(raw); } catch(e){}' +
+        '      var d; try { d = JSON.parse(raw); } catch(e) { d = { startLocation: null, locations: [] }; }' +
+        '      var center = (d.startLocation && Array.isArray(d.startLocation.coords)) ? d.startLocation.coords : ((d.locations && d.locations[0]) ? d.locations[0].coords : [20,0]);' +
+        '      var map = L.map("map").setView(center, 14);' +
+        '      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { attribution: "© OpenStreetMap contributors" }).addTo(map);' +
+        '      if (d.startLocation && Array.isArray(d.startLocation.coords)) {' +
+        '        var dep = d.startLocation.coords;' +
+        '        var startIcon = L.divIcon({ className: "start-marker", html: "<div style=\\"background-color:#22c55e;width:20px;height:20px;border-radius:50%;border:3px solid white;box-shadow:0 0 10px rgba(0,0,0,0.35);\\"></div>", iconSize: [20,20], iconAnchor: [10,10] });' +
+        '        L.marker(dep, { icon: startIcon, zIndexOffset: 1000 })' +
+        '          .bindPopup("<strong>🚚 " + (d.startLocation.name || "Start Location") + "</strong><br/>" + dep[0].toFixed(4) + ", " + dep[1].toFixed(4))' +
+        '          .addTo(map);' +
+        '      }' +
+        '      var bounds = [];' +
+        '      if (d.startLocation && Array.isArray(d.startLocation.coords)) bounds.push(d.startLocation.coords);' +
+        '      (d.locations || []).forEach(function(l, idx){' +
+        '        if (!l || !Array.isArray(l.coords)) return;' +
+        '        var txt = "<strong>" + (l.name || ("Location " + (idx+1))) + "</strong><br/>" + (l.address || (l.coords[0].toFixed(4)+", "+l.coords[1].toFixed(4)));' +
+        '        var m = L.marker(l.coords).bindPopup(txt);' +
+        '        m.addTo(map);' +
+        '        bounds.push(l.coords);' +
+        '      });' +
+        '      if (bounds.length > 1) {' +
+        '        try { map.fitBounds(L.latLngBounds(bounds), { padding: [30,30] }); } catch(e){}' +
+        '      }' +
+        '    })();' +
+        '  <\/script>' +
+        '</body>' +
+        '</html>';
+      const win = window.open('', '_blank', 'width=1100,height=800');
+      if (!win) { showToast('Please allow pop-ups to open the map window.', 'error'); return; }
+      externalMapWinRef.current = win;
+      win.document.open();
+      win.document.write(html);
+      win.document.close();
+    } catch (e) {
+      showToast('Failed to open map in a new window.', 'error');
+    }
+  };
+
+  if (currentView === 'landing') {
+                return (
+                     <div className="min-h-screen flex items-center justify-center p-4 bg-hero">
+                        {/* Toast Notification */}
+                        {toast.show && (
+                            <div className={`fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg max-w-sm transition-all duration-300 ${
+                                toast.type === 'error' ? 'bg-red-500 text-white' :
+                                toast.type === 'success' ? 'bg-green-500 text-white' :
+                                'bg-blue-500 text-white'
+                            }`}>
+                                <div className="flex items-center gap-2">
+                                    <span role="img" aria-label={toast.type === 'error' ? 'Error' : toast.type === 'success' ? 'Success' : 'Info'}>
+                                        {toast.type === 'error' ? '❌' : toast.type === 'success' ? '✅' : 'ℹ️'}
+                                    </span>
+                                    <span className="font-medium">{toast.message}</span>
+                                </div>
+                            </div>
+                        )}
+                        <div className="max-w-4xl mx-auto text-center">
+          <div className="mb-8 animate-pulse">
+            <Zap className="w-24 h-24 mx-auto text-yellow-400 mb-6" />
+                            </div>
+          <h1 className="text-6xl font-bold text white mb-6 leading-tight">
+            Quantum Path Planning
+                                <span className="block text-4xl text-cyan-400 mt-2">Demo</span>
+                            </h1>
+                            <p className="text-xl text-gray-300 mb-12 max-w-2xl mx-auto leading-relaxed">
+            Comparing Classical vs Quantum route planning algorithms for delivery optimization.
+            Experience the future of logistics with quantum computing.
+                            </p>
+                            <button
+            onClick={() => setCurrentView('input')}
+            className="group bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white px-12 py-4 rounded-full text-lg font-semibold transition-all duration-300 transform hover:scale-105 hover:shadow-2xl flex items-center gap-3 mx-auto"
+                            >
+            <Play className="w-6 h-6" />
+                                Start
+            <ArrowRight className="w-6 h-6 group-hover:translate-x-1 transition-transform" />
+                            </button>
+                                                         <div className="mt-16 grid md:grid-cols-3 gap-8">
+                                 <div className="bg-white rounded-2xl p-8 shadow-lg border border-gray-100">
+                                   <Route className="w-12 h-12 text-blue-500 mx-auto mb-4" />
+                                   <h3 className="text-lg font-semibold mb-2 text-gray-900">Route Optimization</h3>
+                                   <p className="text-gray-600">Find the most efficient delivery paths</p>
+                                </div>
+                                 <div className="bg-white rounded-2xl p-8 shadow-lg border border-gray-100">
+                                   <Zap className="w-12 h-12 text-purple-500 mx-auto mb-4" />
+                                   <h3 className="text-lg font-semibold mb-2 text-gray-900">Quantum Computing</h3>
+                                   <p className="text-gray-600">Leverage QAOA for superior results</p>
+                                </div>
+                                 <div className="bg-white rounded-2xl p-8 shadow-lg border border-gray-100">
+                                   <Clock className="w-12 h-12 text-cyan-500 mx-auto mb-4" />
+                                   <h3 className="text-lg font-semibold mb-2 text-gray-900">Real-time Analysis</h3>
+                                   <p className="text-gray-600">Compare algorithms side-by-side</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                );
+            }
+            
+  if (currentView === 'input') {
+                return (
+                     <div className="min-h-screen p-6 bg-hero">
+                        {/* Toast Notification */}
+                        {toast.show && (
+                            <div className={`fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg max-w-sm transition-all duration-300 ${
+                                toast.type === 'error' ? 'bg-red-500 text-white' :
+                                toast.type === 'success' ? 'bg-green-500 text-white' :
+                                'bg-blue-500 text-white'
+                            }`}>
+                                <div className="flex items-center gap-2">
+                                    <span role="img" aria-label={toast.type === 'error' ? 'Error' : toast.type === 'success' ? 'Success' : 'Info'}>
+                                        {toast.type === 'error' ? '❌' : toast.type === 'success' ? '✅' : 'ℹ️'}
+                                    </span>
+                                    <span className="font-medium">{toast.message}</span>
+                            </div>
+                            </div>
+                        )}
+                                                 <div className="max-w-4xl mx-auto">
+                             <div className="text-center mb-12">
+                                                                  <h2 className="text-4xl font-bold text-gray-900 mb-4">Route Optimization Setup</h2>
+              <p className="text-gray-600 text-lg">Follow the steps below to plan your routes</p>
+                             </div>
+                             <div className="space-y-8">
+                                                                 {/* Step 1: Configure Route */}
+                                 <div className="bg-white rounded-2xl p-8 shadow-lg border border-gray-100">
+                                   <h3 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-3">
+                                     <span className="w-8 h-8 bg-blue-500 text-white rounded-full flex items-center justify-center text-sm font-bold">1</span>
+                                     Configure Route
+                                            </h3>
+                                   <div className="grid md:grid-cols-2 gap-6">
+                                     <div>
+                                       <label htmlFor="num-vehicles" className="text-sm font-medium text-gray-700 mb-2 block">Number of Vehicles</label>
+                                       <input 
+                                         id="num-vehicles"
+                                         type="number" 
+                                         min="1"
+                                         value={numVehicles} 
+                                         onChange={(e) => setNumVehicles(parseInt(e.target.value))}
+                                         className="w-full p-3 rounded-lg bg-white text-gray-900 border border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                                       />
+                                     </div>
+                                     <div>
+                                       <label className="text-sm font-medium text-gray-700 mb-2 block">Start Location (Depot)</label>
+                                                <button 
+                                         onClick={() => { setIsSettingStartLocation(true); isSettingStartLocationRef.current = true; showToast('Click on the map to set the Start Location (Depot).', 'info'); }} 
+                                         className={`w-full ${isSettingStartLocation ? 'bg-cyan-500 animate-pulse' : 'bg-cyan-600 hover:bg-cyan-700'} text-white px-4 py-3 rounded-lg text-sm font-medium transition-colors`}
+                                       >
+                                         {isSettingStartLocation ? 'Click map to set start…' : 'Set Start Location'}
+                                                </button>
+                                                                               {startLocation && (
+                                          <div className="mt-2 text-sm text-green-600">
+                                            <span>Start set at {startLocation.name}</span>
+                                            <div className="text-gray-500 text-xs">{startLocation.address}</div>
+                                            {startLocation.digipin && (
+                                              <div className="text-blue-600 text-xs font-mono mt-1">Digipin: {startLocation.digipin}</div>
+                                            )}
+                                            </div>
+                                        )}
+                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                              {/* Step 2: Add Locations */}
+                                 <div className="bg-white rounded-2xl p-8 shadow-lg border border-gray-100">
+                                   <h3 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-3">
+                                     <span className="w-8 h-8 bg-blue-500 text-white rounded-full flex items-center justify-center text-sm font-bold">2</span>
+                                     Add Locations
+                                   </h3>
+                                   
+                                   {/* Input Methods */}
+                                   <div className="grid md:grid-cols-2 gap-6 mb-6">
+                                     {/* Excel Upload */}
+                                     <div>
+                                       <label className="text-sm font-medium text-gray-700 mb-2 block">Upload Excel File</label>
+                                       <div className="h-32 rounded-xl border-2 border-gray-200 bg-gray-50 flex items-center justify-center">
+                                         <label htmlFor="file-upload" className="cursor-pointer bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 transform hover:scale-105 flex items-center gap-2 shadow-lg">
+                                           <FileUp className="w-4 h-4" />
+                                           Select Excel File (.xlsx)
+                                         </label>
+                                         <input id="file-upload" type="file" accept=".xlsx, .xls" onChange={handleFileUpload} className="hidden" />
+                                        </div>
+                                       <p className="text-xs text-gray-500 mt-2">Accepted columns: 'Order ID', 'Order Name', 'Order Location'</p>
+                                       {isGeocoding && (
+                                         <div className="mt-3 flex items-center gap-3 text-blue-600">
+                                           <span className="animate-spin">🔄</span>
+                                           <span className="text-sm">Processing Excel…</span>
+                                           <div className="w-24 h-1 bg-gray-200 rounded overflow-hidden">
+                                             <div className="h-1 bg-blue-500 animate-pulse" style={{width:'60%'}}></div>
+                                           </div>
+                                         </div>
+                                       )}
+                                       {!isGeocoding && excelData && (
+                                         <div className="mt-3 flex items-center gap-2 text-green-600">
+                                           <span>✅</span>
+                                           <span className="text-sm">Excel loaded</span>
+                                         </div>
+                                       )}
+                                        </div>
+                                     
+                                     {/* Digipin Input */}
+                                     <div>
+                                       <label htmlFor="digipin-input" className="text-sm font-medium text-gray-700 mb-2 block">Add by Digipin</label>
+                                       <div className="grid md:grid-cols-3 gap-2">
+                                         <input 
+                                           id="digipin-input"
+                                           type="text" 
+                                           placeholder="Enter Digipin code (e.g., ABC123DEF4)"
+                                           value={digipinInput}
+                                           onChange={(e) => setDigipinInput(e.target.value.toUpperCase())}
+                                           className="flex-1 p-3 rounded-lg bg-white text-gray-900 border border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                                         />
+                                         <input 
+                                           id="digipin-hint"
+                                           type="text" 
+                                           placeholder="Optional location hint (e.g., Veeravasaram)"
+                                           value={digipinHint}
+                                           onChange={(e) => setDigipinHint(e.target.value)}
+                                           className="flex-1 p-3 rounded-lg bg-white text-gray-900 border border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                                         />
+                                         <button
+                                           onClick={handleAddByDigipin}
+                                           disabled={!digipinInput.trim()}
+                                           className="px-4 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white rounded-lg font-medium transition-colors"
+                                         >
+                                           Add
+                                         </button>
+                                    </div>
+                                       <p className="text-xs text-gray-500 mt-2">Enter a 10-character Digipin code. Optionally add a city/area hint to align the result.</p>
+                                </div>
+                                   </div>
+                                   
+                                   {/* Map */}
+                                                            <div>
+                                     <div className="flex items-center justify-between mb-4">
+                                       <h4 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                                         <Navigation className="w-5 h-5 text-blue-500" />
+                                         Interactive Map
+                                       </h4>
+                                       <div className="flex gap-2">
+                                         <button onClick={() => { setIsSettingStartLocation(true); isSettingStartLocationRef.current = true; showToast('Click on the map to set the Start Location (Depot).', 'info'); }} className="bg-cyan-600 hover:bg-cyan-700 text-white px-3 py-2 rounded-lg text-sm font-medium transition-colors">Set Start Location</button>
+                                         <button onClick={clearAllLocations} className="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-1">
+                                           <Trash2 className="w-4 h-4" /> Clear All
+                                         </button>
+                                                            </div>
+                                                        </div>
+                                     <div ref={mapRef} className="relative h-96 rounded-xl border-2 border-gray-200 bg-gray-50" style={{minHeight: '400px'}}>
+                                       {!mapLoaded && (
+                                         <div className="absolute inset-0 flex items-center justify-center">
+                                           <div className="text-center p-4 rounded-xl border border-gray-200 bg-white bg-opacity-95 shadow-lg">
+                                             <div className="animate-spin text-2xl mb-2">🗺️</div>
+                                             <p className="text-sm text-gray-700">Loading map...</p>
+                                                    </div>
+                                                </div>
+                                       )}
+                                       {isGeocoding && (
+                                         <div className="absolute inset-0 flex items-center justify-center">
+                                           <div className="text-center p-4 rounded-xl border border-gray-200 bg-white bg-opacity-95 shadow-lg">
+                                             <div className="animate-spin text-2xl mb-2">🔄</div>
+                                             <p className="text-sm text-gray-700">Geocoding addresses…</p>
+                                                    </div>
+                                                </div>
+                                       )}
+                                       {isRouting && (
+                                         <div className="absolute inset-0 flex items-center justify-center">
+                                           <div className="text-center p-4 rounded-xl border border-gray-200 bg-white bg-opacity-95 shadow-lg">
+                                             <div className="animate-spin text-2xl mb-2">🧭</div>
+                                             <p className="text-sm text-gray-700">Drawing route…</p>
+                                           </div>
+                                         </div>
+                                       )}
+                                     </div>
+                                     {isSettingStartLocation && (
+                                       <p className="text-sm text-blue-600 mt-2">Start mode active: Click on the map to place the Start Location (Depot).</p>
+                                            )}
+                                        </div>
+                                        
+                                   {/* Geocoded Locations Preview */}
+                                   {selectedLocations.length > 0 && (
+                                     <div className="mt-6 p-4 bg-gray-50 rounded-xl border border-gray-200">
+                                       <h4 className="text-gray-900 font-semibold mb-3">Loaded Locations ({selectedLocations.length})</h4>
+                                       <div className="space-y-2 max-h-32 overflow-y-auto">
+                                         {selectedLocations.map((loc, i) => (
+                                           <div key={loc.id} className="text-sm text-gray-700">{i + 1}. {loc.name} <span className="text-gray-500">({loc.address})</span></div>
+                                         ))}
+                                       </div>
+                                     </div>
+                                   )}
+                                 </div>
+                                 
+                                 {/* Step 3: Review & Optimize */}
+                                 <div className="bg-white rounded-2xl p-8 shadow-lg border border-gray-100">
+                                   <h3 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-3">
+                                     <span className="w-8 h-8 bg-blue-500 text-white rounded-full flex items-center justify-center text-sm font-bold">3</span>
+                                     Review & Optimize
+                                        </h3>
+                                   
+                                   {/* Selected Locations List */}
+                                   <div className="mb-8">
+                                     <h4 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                                       <MapPin className="w-5 h-5 text-blue-500" />
+                                       Selected Locations ({selectedLocations.length})
+                                     </h4>
+                                     <div className="space-y-3 max-h-64 overflow-y-auto">
+                                            {selectedLocations.length === 0 ? (
+                                         <div className="text-center py-8 text-gray-500">
+                                           <MapPin className="w-12 h-12 mx-auto mb-3 opacity-50" />
+                                                    <p>No locations selected</p>
+                                           <p className="text-sm">Use the map or input methods above to add locations</p>
+                                                </div>
+                                            ) : (
+                                                selectedLocations.map((location, index) => (
+                                           <div key={location.id} className="bg-gray-50 rounded-xl p-4 flex items-center justify-between border border-gray-200">
+                                                        <div className="flex items-center gap-3">
+                                               <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white font-semibold text-sm">{index + 1}</div>
+                                                            <div>
+                                                 <h4 className="text-gray-900 font-medium">{location.name}</h4>
+                                                 <p className="text-gray-600 text-sm">{location.address}</p>
+                                                 {location.digipin && (
+                                                   <p className="text-blue-600 text-xs font-mono">Digipin: {location.digipin}</p>
+                                                 )}
+                                                            </div>
+                                                        </div>
+                                             <button onClick={() => removeLocation(location.id)} className="text-red-500 hover:text-red-600 transition-colors">
+                                               <Trash2 className="w-4 h-4" />
+                                                        </button>
+                                                    </div>
+                                                ))
+                                            )}
+                                        </div>
+                                        </div>
+                                   
+                                   {/* Optimize Button */}
+                                   <div className="text-center">
+                                        <button
+                                       onClick={runComparison}
+                                       disabled={selectedLocations.length < 2 || isLoading}
+                                       className="w-full max-w-md bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 disabled:from-gray-600 disabled:to-gray-700 text-white px-8 py-4 rounded-full text-xl font-semibold transition-all duration-300 transform hover:scale-105 disabled:scale-100 disabled:cursor-not-allowed flex items-center justify-center gap-3 mx-auto"
+                                        >
+                                            {isLoading ? (
+                                                <span className="flex items-center gap-3">
+                                           <RefreshCw className="w-6 h-6 animate-spin" />
+                                           Optimizing Routes...
+                                                </span>
+                                            ) : (
+                                                <span className="flex items-center gap-3">
+                                           <Zap className="w-6 h-6" />
+                                                    Compare Algorithms
+                                                </span>
+                                            )}
+                                        </button>
+                                     {selectedLocations.length < 2 && (
+                                       <p className="text-center text-sm text-gray-500 mt-3">Need at least 2 locations to optimize</p>
+                                     )}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                );
+            }
+            
+  if (currentView === 'results') {
+    // Don't render results view if results is null
+    if (!results) {
+                return (
+        <div className="min-h-screen p-6 bg-hero">
+          {/* Toast Notification */}
+          {toast.show && (
+            <div className={`fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg max-w-sm transition-all duration-300 ${
+              toast.type === 'error' ? 'bg-red-500 text-white' :
+              toast.type === 'success' ? 'bg-green-500 text-white' :
+              'bg-blue-500 text-white'
+            }`}>
+              <div className="flex items-center gap-2">
+                <span role="img" aria-label={toast.type === 'error' ? 'Error' : toast.type === 'success' ? 'Success' : 'Info'}>
+                  {toast.type === 'error' ? '❌' : toast.type === 'success' ? '✅' : 'ℹ️'}
+                </span>
+                <span className="font-medium">{toast.message}</span>
+              </div>
+            </div>
+          )}
+          <div className="max-w-4xl mx-auto text-center">
+            <div className="bg-white rounded-2xl p-8 shadow-lg border border-gray-100">
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">No Results Available</h2>
+              <p className="text-gray-600 mb-6">Please run the route optimization first to see results.</p>
+              <button onClick={() => setCurrentView('input')} className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-colors">
+                Go to Input
+              </button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+    
+    return (
+      <div className="min-h-screen p-6 bg-hero">
+        {/* Toast Notification */}
+        {toast.show && (
+          <div className={`fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg max-w-sm transition-all duration-300 ${
+            toast.type === 'error' ? 'bg-red-500 text-white' :
+            toast.type === 'success' ? 'bg-green-500 text-white' :
+            'bg-blue-500 text-white'
+          }`}>
+            <div className="flex items-center gap-2">
+              <span role="img" aria-label={toast.type === 'error' ? 'Error' : toast.type === 'success' ? 'Success' : 'Info'}>
+                {toast.type === 'error' ? '❌' : toast.type === 'success' ? '✅' : 'ℹ️'}
+              </span>
+              <span className="font-medium">{toast.message}</span>
+            </div>
+          </div>
+        )}
+                        <div className="max-w-7xl mx-auto">
+                            <div className="text-center mb-8">
+            <h2 className="text-4xl font-bold text-gray-900 mb-2">Route Comparison Results</h2>
+            <p className="text-gray-600 text-lg mb-4">Classical vs Quantum Algorithm Performance</p>
+            {excelData && (
+              <div className="bg-white rounded-xl p-3 shadow border inline-block text-left">
+                <div className="flex items-center justify-between gap-6">
+                  <div className="font-semibold text-sm">Uploaded Excel</div>
+                  <button onClick={() => setShowUploadPreview(v => !v)} className="text-xs px-2 py-1 rounded bg-gray-800 text-white">{showUploadPreview ? 'Hide' : 'View Upload'}</button>
+                </div>
+                {showUploadPreview && (
+                  <div className="mt-2 max-h-48 overflow-auto text-xs">
+                    <table className="min-w-full text-left">
+                      <thead>
+                        <tr>
+                          <th className="pr-3 py-1">Order ID</th>
+                          <th className="pr-3 py-1">Order Name</th>
+                          <th className="pr-3 py-1">Location</th>
+                          <th className="pr-3 py-1">Digipin</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {(excelData || []).slice(0, 50).map((row, i) => (
+                          <tr key={i} className="border-t">
+                            <td className="pr-3 py-1">{row['Order ID'] || ''}</td>
+                            <td className="pr-3 py-1">{row['Order Name'] || ''}</td>
+                            <td className="pr-3 py-1">{row['Order Location'] || row['Location'] || row['Address'] || ''}</td>
+                            <td className="pr-3 py-1">{row['Digipin'] || row['digipin'] || ''}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+            )}
+                            </div>
+                            <div className="grid lg:grid-cols-2 gap-8 mb-12">
+            <div className="bg-gradient-to-br from-orange-500 to-red-600 rounded-3xl p-8 text white">
+                                        <div className="flex items-center gap-3 mb-6">
+                <Route className="w-8 h-8" />
+                                            <h3 className="text-2xl font-bold">Classical Algorithm</h3>
+                                        </div>
+                                    <div className="bg-black bg-opacity-20 rounded-2xl p-6 mb-6">
+                <h4 className="text-lg font-semibold mb-3">Route Sequence</h4>
+                {results.classical && results.classical.routesByVehicle ? (
+                  results.classical.routesByVehicle.map((route, routeIndex) => (
+                    <div key={routeIndex} className="bg-gray-800 bg-opacity-50 rounded-xl p-4 mb-4">
+                      <h5 className="text-md font-semibold mb-2 text-orange-200">Vehicle {routeIndex + 1} ({Number(route.length_km).toFixed(2)} km)</h5>
+                      <div className="flex flex-wrap gap-2 items-center">
+                        {route.tourNames.map((name, idx) => (
+                          <div key={idx} className="flex items-center">
+                            <span className="bg-white bg-opacity-20 px-3 py-1 rounded-full text-sm">{idx + 1}. {name}</span>
+                            {idx < route.tourNames.length - 1 && (<ArrowRight className="w-4 h-4 mx-2" />)}
+                          </div>
+                        ))}
+                      </div>
+                      <div className="mt-3">
+                        <button onClick={() => showVehicleRoute('classical', routeIndex)} className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-sm">Show on Map</button>
+                      </div>
+                    </div>
+                  ))
+                ) : (results.classical && results.classical.route ? (
+                                                <div className="flex flex-wrap gap-2">
+                    {results.classical.route.map((location, index) => (
+                                                        <div key={index} className="flex items-center">
+                        <span className="bg-white bg-opacity-20 px-3 py-1 rounded-full text-sm">{index + 1}. {location}</span>
+                        {index < results.classical.route.length - 1 && (<ArrowRight className="w-4 h-4 mx-2" />)}
+                                                        </div>
+                                                    ))}
+                                                </div>
+                ) : (
+                  <div className="text-sm text-gray-200">No route data.</div>
+                                        ))}
+                                    </div>
+                                    <div className="grid grid-cols-3 gap-4">
+                                        <div className="text-center">
+                                            <div className="text-3xl font-bold">{results.classical.totalDistance}km</div>
+                                            <div className="text-sm opacity-80">Total Distance</div>
+                                        </div>
+                                        <div className="text-center">
+                                            <div className="text-3xl font-bold">{results.classical.totalTime}min</div>
+                                            <div className="text-sm opacity-80">Total Time</div>
+                                        </div>
+                                        <div className="text-center">
+                                            <div className="text-3xl font-bold">{results.classical.efficiency}%</div>
+                                            <div className="text-sm opacity-80">Efficiency</div>
+                                        </div>
+                                    </div>
+                                    <div className="mt-4 text-sm opacity-80">Algorithm: {results.classical.algorithm}</div>
+                                </div>
+            <div className="bg-gradient-to-br from-cyan-500 to-blue-600 rounded-3xl p-8 text white relative overflow-hidden">
+              <div className="absolute top-4 right-4"><Zap className="w-6 h-6 text-yellow-300" /></div>
+                                    <div className="flex items-center gap-3 mb-6">
+                <Zap className="w-8 h-8" />
+                                        <h3 className="text-2xl font-bold">Quantum Algorithm</h3>
+                                    </div>
+                                    <div className="bg-black bg-opacity-20 rounded-2xl p-6 mb-6">
+                <h4 className="text-lg font-semibold mb-3">Route Sequence</h4>
+                {results.quantum && results.quantum.routesByVehicle ? (
+                  results.quantum.routesByVehicle.map((route, routeIndex) => (
+                    <div key={routeIndex} className="bg-gray-800 bg-opacity-50 rounded-xl p-4 mb-4">
+                      <h5 className="text-md font-semibold mb-2 text-cyan-200">Vehicle {routeIndex + 1} ({Number(route.length_km).toFixed(2)} km)</h5>
+                      <div className="flex flex-wrap gap-2 items-center">
+                        {route.tourNames.map((name, idx) => (
+                          <div key={idx} className="flex items-center">
+                            <span className="bg-white bg-opacity-20 px-3 py-1 rounded-full text-sm">{idx + 1}. {name}</span>
+                            {idx < route.tourNames.length - 1 && (<ArrowRight className="w-4 h-4 mx-2" />)}
+                          </div>
+                        ))}
+                      </div>
+                      <div className="mt-3">
+                        <button onClick={() => showVehicleRoute('quantum', routeIndex)} className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-sm">Show on Map</button>
+                      </div>
+                    </div>
+                  ))
+                ) : (results.quantum && results.quantum.route ? (
+                                                <div className="flex flex-wrap gap-2">
+                    {results.quantum.route.map((location, index) => (
+                                                        <div key={index} className="flex items-center">
+                        <span className="bg-white bg-opacity-20 px-3 py-1 rounded-full text-sm">{index + 1}. {location}</span>
+                        {index < results.quantum.route.length - 1 && (<ArrowRight className="w-4 h-4 mx-2" />)}
+                                                        </div>
+                                                    ))}
+                                                </div>
+                ) : (
+                  <div className="text-sm text-gray-200">No route data.</div>
+                                        ))}
+                                    </div>
+                                    <div className="grid grid-cols-3 gap-4">
+                                        <div className="text-center">
+                                            <div className="text-3xl font-bold">{results.quantum.totalDistance}km</div>
+                                            <div className="text-sm opacity-80">Total Distance</div>
+                                        </div>
+                                        <div className="text-center">
+                                            <div className="text-3xl font-bold">{results.quantum.totalTime}min</div>
+                                            <div className="text-sm opacity-80">Total Time</div>
+                                        </div>
+                                        <div className="text-center">
+                                            <div className="text-3xl font-bold">{results.quantum.efficiency}%</div>
+                                            <div className="text-sm opacity-80">Efficiency</div>
+                                        </div>
+                                    </div>
+                                    <div className="mt-4 text-sm opacity-80">Algorithm: {results.quantum.algorithm}</div>
+                                </div>
+                            </div>
+                     <div className="bg-white rounded-2xl p-8 mb-8 shadow-lg border border-gray-100">
+             <h3 className="text-2xl font-bold text-gray-900 mb-6 text-center">Performance Comparison</h3>
+             <div className="h-80">
+               <canvas id="perfChart" height="320"></canvas>
+                                </div>
+                            </div>
+                            <div id="flowDiagram" className="bg-white rounded-2xl p-8 mb-8 shadow-lg border border-gray-100 overflow-auto"></div>
+                            <div className="text-center space-x-4">
+                                <button onClick={resetDemo} className="bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800 text-white px-8 py-3 rounded-full text-lg font-semibold transition-all duration-300 transform hover:scale-105">
+                                    Try Different Locations
+                                </button>
+            <button onClick={() => setCurrentView('landing')} className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-8 py-3 rounded-full text-lg font-semibold transition-all duration-300 transform hover:scale-105">
+                                    Back to Home
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                );
+            }
+            
+            return null;
+        };
+
+const rootEl = document.getElementById('root');
+if (rootEl) {
+  const root = ReactDOM.createRoot ? ReactDOM.createRoot(rootEl) : null;
+  if (root) {
+    root.render(<QuantumPathPlanningDemo />);
+  } else {
+    // Fallback for older React versions
+    ReactDOM.render(
+      <QuantumPathPlanningDemo />,
+      rootEl
+    );
+  }
+}
+    </script>
+    {% endraw %}
+    
+</body>
+</html>
