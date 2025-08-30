@@ -1,0 +1,11 @@
+Flask
+gunicorn
+numpy
+qiskit
+qiskit_algorithms
+qiskit_optimization
+qiskit-aer
+scikit-learn
+requests
+Pillow
+werkzeug
