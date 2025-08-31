@@ -1,11 +1,14 @@
 Flask
 gunicorn
 numpy
-qiskit
-qiskit_algorithms
-qiskit_optimization
-qiskit-aer
 scikit-learn
 requests
 Pillow
 werkzeug
+# Specific Qiskit versions for the project
+qiskit==1.4.4
+qiskit-aer==0.17.1
+qiskit-algorithms==0.3.1
+qiskit-ibm-runtime==0.41.0
+qiskit-machine-learning==0.8.3
+qiskit-optimization==0.6.1
